@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mos Toggle</title>
+<style>
+:root{--bg:#fafafa;--fg:#1a1a1a;--mute:#666;--card:#fff;--line:#e5e5e5;--accent:#2563eb;--code:#f3f4f6}
+@media (prefers-color-scheme:dark){:root{--bg:#111;--fg:#eee;--mute:#999;--card:#1b1b1b;--line:#2a2a2a;--accent:#60a5fa;--code:#222}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 -apple-system,system-ui,sans-serif}
+main{max-width:720px;margin:0 auto;padding:48px 16px}
+h1{font-size:2rem;margin:0 0 8px}
+h2{font-size:1.2rem;margin:40px 0 12px}
+p.lead{color:var(--mute);margin:0 0 24px}
+.btn{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600}
+ol li{margin:6px 0}
+pre{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:14px;overflow-x:auto;font-size:13px}
+code{font-family:ui-monospace,Menlo,monospace}
+.note{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 16px;color:var(--mute);font-size:14px}
+</style>
+</head>
+<body>
+<main>
+<h1>Mos Toggle</h1>
+<p class="lead">Auto-turns off <b>Mos</b> smooth scrolling while After Effects or Premiere Pro is in front, and turns it back on in every other app. Runs hidden, starts at login.</p>
+<a class="btn" href="MosToggle.zip" download>Download MosToggle.zip</a>
+
+<h2>Install</h2>
+<ol>
+<li>Install <a href="https://mos.caldis.me/">Mos</a> first.</li>
+<li>Unzip <code>MosToggle.zip</code>.</li>
+<li>Right-click <code>install.command</code> → <b>Open</b> → <b>Open</b>.</li>
+<li>Done. It runs in the background and starts on every login.</li>
+</ol>
+
+<h2>What's in the zip</h2>
+<ul>
+<li><code>install.command</code>: installs and starts the background service.</li>
+<li><code>Mos Toggle Start.app</code>: starts it again if you stopped it. No window.</li>
+<li><code>uninstall.command</code>: stops and removes everything.</li>
+<li><code>mos-toggle.sh</code>: the script itself.</li>
+</ul>
+
+<h2>How it works</h2>
+<p>A macOS LaunchAgent runs this loop. Every second it checks the front app. If it is After Effects or Premiere Pro, Mos is quit. Otherwise Mos is relaunched.</p>
+<pre><code>while true; do
+  app=$(lsappinfo info -only name "$(lsappinfo front)")
+  if [[ $app == *"After Effects"* || $app == *"Premiere Pro"* ]]; then
+    pgrep -xq Mos &amp;&amp; killall Mos
+  else
+    pgrep -xq Mos || open -gb com.caldis.Mos
+  fi
+  sleep 1
+done</code></pre>
+
+<h2>Uninstall</h2>
+<p>Run <code>uninstall.command</code>, or:</p>
+<pre><code>launchctl bootout gui/$(id -u)/com.user.mostoggle
+rm ~/Library/LaunchAgents/com.user.mostoggle.plist</code></pre>
+
+<p class="note">macOS may warn that the files are from an unidentified developer. Use right-click → Open. Mos may take up to 1 second to switch off or on.</p>
+</main>
+</body>
+</html>
